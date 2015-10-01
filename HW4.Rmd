@@ -1,0 +1,174 @@
+---
+title: "HW4"
+output: html_document
+---
+
+
+Question 1: Create vectors
+```{r}
+#a)
+a<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+a #created vector a and calling function
+
+#b)
+b<-c(20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
+b  #created vector b and calling function
+
+#c)
+c<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
+c  #created vector c and calling function
+
+#d)
+temp<-c(4,6,3)
+temp  #created vector temp and calling function
+
+?rep #looks up the function rep
+
+#e) #10 occurrences of 4
+rep(temp, times=c(10))
+#repeat the entire vector 10 times to get 10 occurences of 4
+
+#f) 11 occurrences of 4, 10 occurrences of 6, and 10 occurences of 3
+rep(temp, times=1, length.out=31)
+#we don't want to repeat just the entire vector, we want a number to be repeated more than the others. So we focus on the 'length' of our output vector instead of the number of 'times' we want to repeat the vector
+
+#g) 10 occurrences of 4, 20 occurences of 6, and 30 occurences of 3
+rep(temp, times=c(10,20,30))
+#using information in help, if we enter a vector in 'times' the same length as our input, it maps each number in our input to the corresponding number in the 'times' vector and repeats it by that amount
+```
+Question 2
+```{r}
+#We want to create a vector of the values exp(x)*cos(x) with x = 3, 3.1, ..., 5.9, 6. Instead of typing numbers in x, we can use sequence function in R and specify the increment we want it to list the numbers by
+x<-seq(3, 6, by=0.1)
+x
+#now we can create the vector of the values exp(x)*cos(x) and call the function
+d<-exp(x)*cos(x)
+d
+```
+Question 3
+```{r}
+#a) we want to create a vector of decimals 0.1^n multiplied by 0.2^n-2, where n is multiples of 3
+n<-seq(3,36, by=3) #defining our indices as a vector
+n #checking our indices for 0.1
+n-2 #checking our indices for 0.2
+e<-(0.1^n)*0.2^(n-2) #defining our vector. we don't use c() here because this variable is already using a vector as its input, so applying these operations will result in another vector
+e #calling the function
+(0.1^6)*(0.2^4) #calculating second value in vector to compare to output of function
+
+#b) we want to create a vector of fractions with 2^m as the numerator and m as the denominator
+m<-seq(1, 25, by=1) #defining our indices and denominators
+m #checking the vector to ensure it lists 1:25
+f<-c((2^m)/m) #defining our vector that will create the fractions
+f #calling the function
+(2^4)/4 #checking 4th value in vector to compare to output of function
+```
+Question 4
+```{r}
+#a) we want to calculate the function sum(i^3+4*i^2) from 10 to 100. first we define the limits of the sum
+i<-seq(10, 100, by=1)
+i #checking that the sequence results in the values we need to calculate the sum
+sum((i^3)+4*(i^2)) #summing the operation for all values of i defined above
+
+#b) we want to calculate the function sum((2^i)/i) + (3^i/i^2)) from 1 to 25. defining the limits of the sum
+i<-seq(1, 25, by=1)
+i #checking that the limits go from 1 to 25 as we need for the sum
+sum(((2^i)/i)+((3^i)/(i^2))) #summing with the input function
+```
+Question 5
+
+```{r}
+#a) we want to use the function 'paste' to create a character vector with a string of text and numbers with a space in between the string and number following
+paste("label", 1:30, sep=" ") #each character in the vector will have 'label', a number, and a space in between indicated by the 'sep' function
+
+#b) we want to use the function 'paste' to create a character vector with a string of text and numbers with no space in between the string and number following
+paste("fn", 1:30, sep="")
+#each character in the vector will have 'fn', a number, and no space in between
+```
+Question 6
+
+```{r}
+set.seed(50)
+xVec<-sample(0:999, 250, replace=T)
+yVec<-sample(0:999, 250, replace=T)
+xVec
+yVec
+
+#a)we want to create a vector that lists y_n - x_n-1 starting with n=2. we can take the yVec and xVec vectors defined above and create a vector g that lists the differences between y_n and x_n-1; we start with 2 in the yVec (since we want to start with n=2) and 1 in the xVec (to start with n-1=1) 
+g<-(yVec[2:250]-xVec[1:249])
+g #call function
+
+#b) we want to create a vector that lists sin(y_n)/cos(x_n+1) starting with n=1. we can take the yVec and xVec vectors defined above and create a vector j that lists those fractions; we start with 1 in the yVec (since we want to start with n=1) and 2 in the xVec (to start with n+1=2)
+j<-c(sin(yVec[1:249])/cos(xVec[2:250]))
+j #call function
+sin(yVec[1])/cos(xVec[2]) #checking first value to compare to output of our function
+
+#c) Using the xVec vector of random integers of length 250, we want to solve the function x_1+2*x_2-x_3 where each term in the function corresponds to an integer in the xVec vector. 
+?seq
+p<-xVec[seq(1, length(xVec)-1, by=3)] #since thelength of the vector is 250, dividing by 3 we see that there is a remainder of one number in the vector. this number would be associated with the first term in our function we want to calculate. meaning our vector 'p' i.e. the first terms in our function, will be longer than the 2nd and 3rd terms in our function i.e. the variables below. so we shorten the length of xVec we wish to pull from by 1
+p
+q<-xVec[seq(2, length(xVec), by=3)] #creating a sequence of every third element in our xVec vector, beginning with the 2nd element. this will be the 2nd term in our function we want to estimate
+q
+r<-xVec[seq(3, length(xVec), by=3)] #creating a sequence of every third element in our xVec vector, beginning with the 3rd element. this will be the 3rd term in our function we want to estimate
+r
+s<-(p+(2*q)-r) #this variable will be the function we want to estimate. it is a combination of the 1st, 2nd, and 3rd terms of the function created above.
+s
+xVec[4]+(2*xVec[5])-xVec[6] #checking a value that should be a result of our output according to the function
+
+#d) #we want to calculate a function that will sum a fraction of our xVec characters, from the 1st to the n-1 (249)th character in xVec
+x_num<-xVec[seq(2, length(xVec), by=1)] #since we're starting at the 2nd character in our vector xVec (x_i+1), we want to ensure the n-1+1th character is included in our sequence, hence we include the entire length of xVec
+x_num
+x_den<-xVec[seq(1, length(xVec)-1, by=1)] #we want the x_i value for the denominator so we create a sequence that runs from the first character to the n-1th character in xVec
+x_den
+sum(exp(-x_num)/(x_den+10)) #calculating our function
+```
+
+Question 7
+```{r}
+#a) we want to list the values in yVec that are greater than 600. we create a variable will take yVec and list those numbers in the vector that are greater than 600
+t<-yVec[yVec>600]
+t #calling function to check that values are greater than 600
+
+#b) we want to determine the indices of those characters in yVec that are greater than 600.
+u<-which(yVec>600)
+u
+
+#c) we want to list the characters in xVec that have the same indices as those characters in yVec that are greater than 600
+xVec[xVec=u]
+xVec #listing xVec again to check some of the indices against the values in the output of our function above
+
+#d) we want to create a vector that lists the square root of the absolute value of the difference between each character in the xVec vector and the mean of the xVec vector
+x_bar<-mean(xVec) #defining x_bar as the mean of the vector x = (x_1, ..., x_n) which aligns with characters in xVec vector
+x_bar
+sqrt(abs(xVec-x_bar)) #we first find the difference between each character in xVec and the mean calculated above, then we take the absolute value of the result to avoid any negative numbers, and we find the square root of that result 
+sqrt(abs(xVec[2]-x_bar)) #checking value against 2nd output in our function
+sqrt(abs(xVec[246]-x_bar)) #checking value against 246th output in our function
+
+#e) we want to find out how many values in yVec are within 200 of the maximum value of yVec
+max(yVec) #first we find out the maximum value in yVec which is 997
+yVec[yVec>796] #we want values within 200 of the max 997, which means we want all characters between 797 and 997. we use this function to list all the characters we want and check their values
+length(yVec[yVec>796]) #we want to determine how many characters there are in our interval above, so we determine its length
+
+#f) we want to determine the number of characters in xVec that are divisible by 2. there are different ways to do this; one of which is to determine the indices of all even characters in xVec, and count that list of indices
+which(xVec %% 2 == 1) #listing the indices of characters in xVec that are even
+length(which(xVec %% 2 == 1)) #we want the length of the list above i.e. count how many characters in xvec are even
+
+#g) we want to sort xVec based on the order of the values in yVec.
+?sort
+yVec[sort(order(yVec)[xVec])] #we need to take the values in yVec (so we start with yVec[]) and then sort xVec based on their order. So we sort() with input of the values of xvec, [xVec], and the order of yVec.
+yVec #checking yVec values to see if output of function above is in order of yVec values.
+
+#h) we want to list the characters in yVec that are in the index positions 1, 4, 7, 10, etc. i.e. we want every third yVec character, beginning with the first one.
+yVec[seq(1, length(yVec), by = 3)]
+yVec #listing values of yVec to do a quick comparison to output of above function
+```
+Question 8
+
+```{r}
+?cumprod
+s<-c(1:19) #given the formula we want to use below, we want a vector that lists the numbers 1 through 19. we will be doubling the characters in this integer to calculate our final sum, so we a vector half the length of our last numerator term i.e. 38/2
+(2*s)/(2*s+1) #creating the fractions in the pattern we need for our final sum; we use each character in our s variable above. we will use this as input for our sum
+2/3 #verifying some of the output values of our function above
+4/5
+6/7
+38/39
+1+sum(cumprod((2*s)/(2*s+1))) #summing the cumulative product of each of the results of our function above. we have to include 1 in this sum because our formula doesn't account for it. our formula only results in 2/3, 4/5, ..., 38/39.
