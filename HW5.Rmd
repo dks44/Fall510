@@ -1,0 +1,105 @@
+---
+title: "HW5"
+output: html_document
+---
+
+Question 1
+```{r}
+require(scales) #to view the data in a tabular format
+data(diamonds)
+numcols<-diamonds[sapply(diamonds, is.numeric)] #we use the sapply function to apply an operation to a list of data. in this case we want to  pull out those columns that are numeric (hence is.numeric function) from the diamonds data. we can use this function on any data frame.
+numcols
+names(numcols)#calling the function
+View(diamonds) #to compare the output of our numcols function to the data in diamonds
+
+```
+
+Question 2
+```{r}
+require(scales) #to view the data in a tabular format
+data(diamonds)
+numcols<-diamonds[sapply(diamonds, is.numeric)] #we use the sapply function to apply an operation to a list of data. in this case we want to  pull out those columns that are numeric (hence is.numeric function) from the diamonds data. we can use this function on any data frame.
+numcols
+names(numcols)#identifying the columns in numcols
+View(diamonds) #to compare the output of our numcols function to the data in diamonds
+
+F<-t(combn(names(numcols), 2)) #we want to form combinations of 2 of all the column names in numcols/ the combn function spits out all unique combinations. we do a tranpose of the matrix, t(), to make the pairings easier to read
+F
+Pairings<-paste(F[,1], F[,2], sep="-") #we want to take the columns of our combination matrix and separate them by a hyphen. we use the names of the columns of our variable F in the paste function
+Pairings
+
+cor(numcols) #creating our correlation matrix of all numeric columns in data diamonds
+test<-cor(numcols) #creating a variable associated with our above correlation matrix to be used later when creating our data frame
+
+test[upper.tri(test,diag=TRUE)]=NA #our correlation matrix has repetitive numbers and we want to extract the unique ones. we segregate just the upper triangle of the matrix, telling R that the diagonal should be included but coded NA, as well as the duplicates.
+test=as.data.frame(as.table(test)) #making our segregated correlation matrix into a data frame that we will later add our Pairings column to
+test=na.omit(test) #getting rid of all the NAs that came out of the diagonals and duplicate values
+test #call function to check values and layout
+cbind(Pairings, test) #binding the Pairings column to our test variable created above. comparing early combinations resulting from our Pairings variable with the upper triangle correlation variables in our test variable
+DF.num<-cbind(Pairings, test[,c(3)]) #now that we've checked the variable combinations line up, we can drop the first 2 columns in our test variable and create a data frame of just Pairings and resulting correlations.
+DF.num
+
+#testing some correlations to compare to our table
+cor(diamonds$y, diamonds$z)
+cor(diamonds$table, diamonds$price)
+cor(diamonds$depth, diamonds$table)
+cor(diamonds$carat, diamonds$table)
+
+
+
+#Question 3
+
+#I tried quite a lot of different ways to plot the variables from Question 2, but I just couldn't figure it out without having to type out 21 lines of code. I think it has to do with the way i set up my 'test' variable with just column names and not the actual values of the columns.
+
+#Doing a ggplot of the combinations listed in our 'test' variable from Question 2. We use Var2 as our x and Var1 as our y, then use the Freq info (i.e. the correlation of each Var1 and Var2) to label the plot. we add a layer geom_point to create the scatter plot.
+
+#1
+ggplot(numcols, aes(x=carat, y=depth))+geom_point()+labs(title=test$Freq[1])
+#2
+ggplot(numcols, aes(x=carat, y=table))+geom_point()+labs(title=test$Freq[2])
+#3
+ggplot(numcols, aes(x=carat, y=price))+geom_point()+labs(title=test$Freq[3])
+#4
+ggplot(numcols, aes(x=carat, y=x))+geom_point()+labs(title=test$Freq[4])
+#5
+ggplot(numcols, aes(x=carat, y=y))+geom_point()+labs(title=test$Freq[5])
+#6
+ggplot(numcols, aes(x=carat, y=z))+geom_point()+labs(title=test$Freq[6])
+#7
+ggplot(numcols, aes(x=depth, y=table))+geom_point()+labs(title=test$Freq[7])
+#8
+ggplot(numcols, aes(x=depth, y=price))+geom_point()+labs(title=test$Freq[8])
+#9
+ggplot(numcols, aes(x=depth, y=x))+geom_point()+labs(title=test$Freq[9])
+#10
+ggplot(numcols, aes(x=depth, y=y))+geom_point()+labs(title=test$Freq[10])
+#11
+ggplot(numcols, aes(x=depth, y=z))+geom_point()+labs(title=test$Freq[11])
+#12
+ggplot(numcols, aes(x=table, y=price))+geom_point()+labs(title=test$Freq[12])
+#13
+ggplot(numcols, aes(x=table, y=x))+geom_point()+labs(title=test$Freq[13])
+#14
+ggplot(numcols, aes(x=table, y=y))+geom_point()+labs(title=test$Freq[14])
+#15
+ggplot(numcols, aes(x=table, y=z))+geom_point()+labs(title=test$Freq[15])
+#16
+ggplot(numcols, aes(x=price, y=x))+geom_point()+labs(title=test$Freq[16])
+#17
+ggplot(numcols, aes(x=price, y=y))+geom_point()+labs(title=test$Freq[17])
+#18
+ggplot(numcols, aes(x=price, y=z))+geom_point()+labs(title=test$Freq[18])
+#19
+ggplot(numcols, aes(x=x, y=y))+geom_point()+labs(title=test$Freq[19])
+#20
+ggplot(numcols, aes(x=x, y=z))+geom_point()+labs(title=test$Freq[20])
+#21
+ggplot(numcols, aes(x=y, y=z))+geom_point()+labs(title=test$Freq[21])
+
+
+
+
+#a much quicker option I discovered...
+pairs(numcols) #gives a matrix of all scatterplot between pairs of variables in our input i.e. all numeric columns in diamonds. but doesn't allow labelling of individual plots; also isn't ggplot!! 
+
+
