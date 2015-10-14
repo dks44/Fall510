@@ -1,0 +1,69 @@
+---
+title: "TEST1_R"
+output: html_document
+---
+
+Question 1
+```{r}
+
+head(mtcars) #looking at some of the data mtcars
+dim(mtcars) #determining how many
+View(mtcars)#looking at the full table of data
+a<-mtcars$vs #creating a variable that's just the vs column that we're interested in
+b=as.data.frame(a) #ensuring this column is a data frame
+table(b) #looking at this table, we see that this results in a ratio of 18:14 (9:7) for 0 to 1 in the mtcars$vs
+dim(diamonds) #there are 53940 observations in our diamonds data set. Using the ratio of 0 to 1 from mtcars$vs, this implies a ratio of 30341:23599 for 0 to 1 in our diamonds data. this means we want a column of 30341 zeros and 23599 ones. the logical equivalent of this ratio for 0 is False and 1 is True, would be 30341 False and 23599 True
+
+logic.col<-c(rep(TRUE,23599), rep(FALSE,30341)) #creating our logical equivalent column in the ratio of the mtcars$vs variables
+
+logic.col[30342] #checking that this will return 'False' since we only have 30341 False rows
+logic.col[23590:23601] #checking that this will return a list of 'True' and'False' since we only have 23599 True rows
+diamonds_logic.col<-cbind(diamonds, logic.col) #creating our appended diamonds dataset with the added logical equivalent column, by doing a column bind of diamonds with our created column of 'True' and 'False. We will call it diamonds_logic.col
+head(diamonds_logic.col) #checking the headers of our combined data set and some of the elements.
+
+```
+
+Question 2
+```{r}
+x<-names(which(sapply(diamonds_logic.col, is.factor))) #using the diamonds data set, we're determining which columns are factors, and assigning the names of these columns to our variable 'x'
+y<-names(which(sapply(diamonds_logic.col, is.logical))) #using the diamonds data set, we're determining which columns are logical, and assigning the names of these columns to our variable 'y'
+x #calling function
+y #calling function
+```
+
+Question 3
+```{r}
+#we want to create a bar graph with a gray fill for each of the factor and logical variables in our data set diamonds_logic.col. We'll use ggplot and add a layer of geom_bar where we will specify that the bar graph with be shaded gray.The x axis will be the particular variable we want a bar graph of. we will lavel the x axis and give the graph a title.
+
+factor_cut<-ggplot(diamonds_logic.col, aes(x=diamonds_logic.col$cut))+geom_bar(fill="gray")+labs(x="Cut", title="Factor Variable - Cut")
+factor_cut
+
+factor_color<-ggplot(diamonds_logic.col, aes(x=diamonds_logic.col$color))+geom_bar(fill="gray")+labs(x="Color", title="Factor Variable - Color")
+factor_color
+
+factor_clarity<-ggplot(diamonds_logic.col, aes(x=diamonds_logic.col$clarity))+geom_bar(fill="gray")+labs(x="Clarity", title="Factor Variable - Clarity")
+factor_clarity
+
+logic_var<-ggplot(diamonds_logic.col, aes(x=diamonds_logic.col$logic.col))+geom_bar(fill="gray")+labs(x="Logical Column", title="Logical Variable")
+logic_var
+```
+
+Question 4
+```{r}
+
+freq_cut<-count(diamonds_logic.col, 'cut') #creating a variable that counts the instances of each category of 'cut' in our diamonds_logic.col data frame
+freq_cut #calling frequency table of cut categories
+
+freq_color<-count(diamonds_logic.col, 'color') #creating a variable that counts the instances of each category of 'color' in our diamonds_logic.col data frame
+freq_color #calling frequency table of color categories
+
+freq_clarity<-count(diamonds_logic.col, 'clarity') #creating a variable that counts the instances of each category of 'clarity' in our diamonds_logic.col data frame
+freq_clarity #calling frequency table of clarity categories
+
+freq_logic<-count(diamonds_logic.col, 'logic.col') #creating a variable that counts the instances of each category of 'logic.col' in our diamonds_logic.col data frame, i.e. True or False
+freq_logic #calling frequency table of logic.col categories
+
+list(freq_cut, freq_color, freq_clarity, freq_logic) #putting the 4 frequency tables we created above in 1 list
+
+count(diamonds_logic.col, c('cut', 'color', 'clarity', 'logic.col')) #this makes a 'cleaner' list of the frequencies of each category of our factor and logical variables, however it's not as easy to read the frequencies of each category!
+```
