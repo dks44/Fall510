@@ -1,0 +1,437 @@
+---
+title: "explore"
+output: html_document
+---
+
+
+Question 1
+
+```{r}
+Plot_Num <- function(Num_Frame, Bin_Sizes, Threshold) #send in the numeric data frames, some bin sizes which we will specify later in our input, and a specific threshold
+{
+  for (i in 1:length(Num_Frame)) #for every variable in our data frame
+  {
+    for (bins in 1:length(Bin_Sizes)) #for every bin size that we specify in our input
+    {
+      #Calculate bin size
+      num_bins <- (max(Num_Frame[[i]])-min(Num_Frame[[i]]))/Bin_Sizes[bins]
+      
+      #Calculate the mean and its label. we will use this mean later as the x intercept
+      col_mean <- mean(Num_Frame[[i]])
+      mean_Label = sprintf("%8.2f ", col_mean)
+      
+      #Plot regular count histogram with the x axis being the variables in our data frame, and specifying that we stay in the local (and not global) environment to acoid errors
+      Num_Plot <- ggplot(Num_Frame, aes(x=Num_Frame[[i]]),
+                         environment = environment()) #adding in layer of a red straight line where the column mean is and labels for each of the variable in our data frame
+      Num_Plot <- Num_Plot +
+        geom_histogram(colour = 'gray',
+                       fill = 'gray',
+                       binwidth=num_bins) +
+        labs(x=names(Num_Frame)[[i]]) +
+        geom_vline(xintercept=col_mean, colour='red') +
+        annotate("text",x=col_mean,y=0,label=mean_Label,hjust=0)#telling it where to place the labels we created. hjust means horizontal adjustment
+      print(Num_Plot)
+      
+      #Plot density histogram using what we've defined above
+      print(Num_Plot + aes(y=..density..) + labs(y="Density"))
+
+    } 
+  }
+}
+
+
+```
+
+Question 2
+```{r}
+Plot_Data <- function(Data_Frame) #send in the categorical data frame
+{
+  for (i in 1:length(Data_Frame)) #for every variable in our data frame that we input, we will create a ggplot base laye then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
+    {
+    Data_Plot <- ggplot(Data_Frame,
+                        aes(x=Data_Frame[[i]]),
+                        environment = environment())
+    Data_Plot <- Data_Plot +
+        geom_bar(colour = 'gray') +
+        labs(x=names(Data_Frame)[[i]])
+  print(Data_Plot)
+  }
+}
+
+
+#we create a separate ggplot code for the binary variables as the above code resulted in an error message regarding ggplot and logical variables. First we create our variable with a base ggplot calling the data frame and x axis, then we add a bar graph layer to it. We will input the specific data frame in Question 5
+
+bar_binary<-ggplot(datframe, aes(x=datframe$binary))+geom_bar(fill="gray")+labs(title='Binary variable in XX data set')
+
+bar_binary #calling the variable
+```
+
+Question 3
+```{r}
+
+corr_a <- cor(Num_Frame, method="pearson")
+
+r_square <- NULL #making sure these variables are empty
+rsq_names <- NULL
+
+
+#Get the length of the one dimension of the square matrix
+len <- length(corr_a[1,])
+
+#Only loop through the upper right triangle since values are repeated in the correlation matrix
+for (i in (1:(len-1))) {
+  for (j in ((i+1):len)) {
+    #Form the name pair and add to the named pair vector
+    pair_name <- paste(names(corr_a[,1])[[i]],names(corr_a[1,])[[j]],sep="-")
+    rsq_names <- c(rsq_names, pair_name)
+    
+    #Add the r_square value to the value vector
+    r_square <- c(r_square, corr_a[i,j]^2)
+    
+  }
+}
+
+rsq_names
+r_square
+
+#for Question 5, we would replace Num_Frame above with our var_num variable created earlier. This lists all the numeric variable in the Diamonds data set, which would create 21 pairs of each of those variables, and will result in a list of 21 values of r-squared
+
+```
+
+Question 4
+
+```{r}
+#a)
+#to make a frequency table of the categorical variables, we use the 'table' function and apply it to the variables that are not numerical in our data frame or 'datframe'
+
+freq_cat<-table(datframe[which(lapply(datframe, is.numeric) == FALSE)])
+freq_cat
+
+#for Question 5, we use our diamonds data frame as our 'cat_var' input
+datframe<-diamonds
+freq_cat<-table(datframe[which(lapply(datframe, is.numeric) == FALSE)])
+freq_cat
+
+#to make a frequency table of the binary variables, we use the 'table' function and apply it to the variables.
+
+freq_bin<-table(bin_var)
+
+
+#for Question 5, we use our diamonds$vs variables which we know to be binary
+bin_var<-diamonds$vs
+freq_bin<-table(bin_var)
+freq_bin
+
+#b i.
+#summary statistic for each numeric variable in a data frame
+summary(datframe[which(lapply(datframe, is.numeric) == TRUE)])
+
+#for Question 5, we use our diamonds data set as our 'datframe'. Similarly, we could use our var_num variable created above and apply the summary function to it instead
+datframe<-diamonds
+summary(datframe[which(lapply(datframe, is.numeric) == TRUE)])
+
+#b ii.
+#to create a data frame that contains each pair of numerical variable names and their corresponding r squared value, first we determine the pairs of numerical variables and then the r square value of each pair. we repeat the code from an earlier question
+
+corr_a <- cor(Num_Frame, method="pearson")
+
+r_square <- NULL
+rsq_names <- NULL
+corr_list <- NULL
+corr_names <- NULL
+threshold <- NULL
+
+
+#Get the length of the one dimension of the square matrix
+len <- length(corr_a[1,])
+
+#Only loop through the upper right triangle since values are repeated in the correlation matrix
+for (i in (1:(len-1))) {
+  for (j in ((i+1):len)) {
+    #Form the name pair and add to the named pair vector
+    pair_name <- paste(names(corr_a[,1])[[i]],names(corr_a[1,])[[j]],sep="-")
+    rsq_names <- c(rsq_names, pair_name)
+    
+    #Add the r_square value to the value vector
+    r_square <- c(r_square, corr_a[i,j]^2)
+    
+    #Form the name pair again for our 'corr_names' variable, then make a list of the correlation values from the upper triangle of the matrix
+    if (corr_a[i,j] > threshold) {
+  
+      corr_names <- c(corr_names, pair_name)
+      corr_list <- c(corr_list, corr_a[i,j])
+    }
+  }
+}
+
+rsq_names
+r_square
+
+#now we create the data frame that will be a column bind of the names and the r square values that we created above. these values will correspond to the associated name pairs in each row.
+rsq_df <- data.frame(cbind(rsq_names, r_square))
+
+#we will label the column of pairs or names as 'Pair' and the r square values as 'Value'
+names(rsq_df)[1] <- "Pair"
+names(rsq_df)[2] <- "Value"
+
+#call the function
+rsq_df
+
+#create the correlation data frame by binding the name pairs and the corresponding correlation values. repeat procedure as above for r square
+
+corr_df <- data.frame(cbind(corr_names, corr_list))
+names(corr_df)[1] <- "Pair"
+names(corr_df)[2] <- "Value"
+corr_df
+
+#for Question 5 we will replace Num_Frame with out var_num variable created above, and specify the threshold value of 0.25
+```
+
+Question 5
+
+```{r}
+data(diamonds)
+data(mtcars)
+
+var_logical <- diamonds[which(lapply(diamonds, is.logical) == TRUE)]
+
+#Create a logical vector and add to diamonds
+diamonds$vs <- rep((mtcars$vs == 1)[1:31], 1740)
+#making same length as diamonds data set. replicating Trues and Falses in the range of rows 1 to 31
+#doing this as many times needed to make vector same size (in terms of number of rows) as diamonds
+View(diamonds$vs)
+head(diamonds)
+
+#Separate the columns by mode
+var_num <- diamonds[which(lapply(diamonds, is.numeric) == TRUE)]
+var_factor <- diamonds[which(lapply(diamonds, is.factor) == TRUE)]
+var_logical <- diamonds[which(lapply(diamonds, is.logical) == TRUE)]
+
+
+#doing the same for mtcars which only contains numeric variables, two of which are binary
+cars_num<-mtcars[which(lapply(mtcars, is.numeric) == TRUE)]
+cars_factor <- mtcars[which(lapply(mtcars, is.factor) == TRUE)] #this results in data frame with 0 columns and 6 rows
+cars_logical <- mtcars[which(lapply(mtcars, is.logical) == TRUE)]#this results in data frame with 0 columns and 6 rows
+
+
+View(mtcars)
+#we see that binary variables are vs and am
+
+
+#a) 
+
+Plot_Num <- function(Num_Frame, Bin_Sizes, Threshold) #send in the numeric data frames, some bin sizes which we will specify later in our input, and a specific threshold
+{
+  for (i in 1:length(Num_Frame)) #for every variable in our data frame
+  {
+    for (bins in 1:length(Bin_Sizes)) #for every bin size that we specify in our input
+    {
+      #Calculate bin size
+      num_bins <- (max(Num_Frame[[i]])-min(Num_Frame[[i]]))/Bin_Sizes[bins]
+      
+      #Calculate the mean and its label. we will use this mean later as the x intercept
+      col_mean <- mean(Num_Frame[[i]])
+      mean_Label = sprintf("%8.2f ", col_mean)
+      
+      #Plot regular count histogram with the x axis being the variables in our data frame, and specifying that we stay in the local (and not global) environment to acoid errors
+      Num_Plot <- ggplot(Num_Frame, aes(x=Num_Frame[[i]]),
+                         environment = environment()) #adding in layer of a red straight line where the column mean is and labels for each of the variable in our data frame
+      Num_Plot <- Num_Plot +
+        geom_histogram(colour = 'gray',
+                       fill = 'gray',
+                       binwidth=num_bins) +
+        labs(x=names(Num_Frame)[[i]]) +
+        geom_vline(xintercept=col_mean, colour='red') +
+        annotate("text",x=col_mean,y=0,label=mean_Label,hjust=0)#telling it where to place the labels we created. hjust means horizontal adjustment
+      print(Num_Plot)
+      
+      #Plot density histogram using what we've defined above
+      print(Num_Plot + aes(y=..density..) + labs(y="Density"))
+
+    } 
+  }
+}
+
+#Testing the above function with the input of all numerical variables from Diamonds, a vector of specified bin sizes, and a threshold value of 0.25
+Plot_Num(var_num, c(5,20,50), 0.25)
+
+#Testing the above function with the input of all numerical variables from mtcars, a vector of specified bin sizes, and a threshold value of 0.25
+Plot_Num(cars_num, c(5,20,50), 0.25)
+
+
+#b
+Plot_Data <- function(Data_Frame) #send in the categorical data frame
+{
+  for (i in 1:length(Data_Frame)) #for every variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
+    {
+    Data_Plot <- ggplot(Data_Frame,
+                        aes(x=Data_Frame[[i]]),
+                        environment = environment())
+    Data_Plot <- Data_Plot +
+        geom_bar(colour = 'gray') +
+        labs(x=names(Data_Frame)[[i]])
+  print(Data_Plot)
+  }
+}
+
+#plugging in our categorical variables from the Diamonds data frame as the function's input. no categorical variables in mtcars
+Plot_Data(var_factor) 
+
+#we create a separate ggplot code for the binary variables as the above code resulted in an error message regarding ggplot and logical variables. First we create our variable with a base ggplot calling the data frame and x axis, then we add a bar graph layer to it.
+
+bar_binary<-ggplot(diamonds, aes(x=diamonds$vs))+geom_bar(fill="gray")+labs(title='Binary variable in Diamonds data set')
+
+bar_binary #calling the variable
+
+#doing the same thing for mtcars data where binary variables are vs and am
+bar_binary_1<-ggplot(mtcars, aes(x=mtcars$vs))+geom_bar(fill="gray"+labs(title='Binary variable vs in mtcars data set')
+bar_binary_1
+
+bar_binary_2<-ggplot(mtcars, aes(x=mtcars$am))+geom_bar(fill="gray")+labs(title='Binary variable am in mtcars data set')
+bar_binary_2
+
+#c)
+
+#to make a frequency table of the categorical variables, we use the 'table' function and apply it to the variables that are factors in our data frame or 'datframe'. We use our diamonds data frame as our 'cat_var' input
+datframe<-diamonds
+freq_cat<-table(datframe[which(lapply(datframe, is.factor) == TRUE)])
+freq_cat
+
+#to make a frequency table of the binary variables, we use the 'table' function and apply it to the variables. We use our diamonds$vs variables which we know to be binary
+bin_var<-diamonds$vs
+freq_bin<-table(bin_var)
+freq_bin
+
+#i.
+#summary statistic for each numeric variable in a data frame. We use our diamonds data set as our 'datframe'. Similarly, we could use our var_num variable created above and apply the summary function to it instead
+datframe<-diamonds
+summary(datframe[which(lapply(datframe, is.numeric) == TRUE)])
+
+#ii.
+#to create a data frame that contains each pair of numerical variable names and their corresponding r squared value, first we determine the pairs of numerical variables and then the r square value of each pair. we repeat the code from an earlier question
+
+corr_a <- cor(var_num, method="pearson")
+
+r_square <- NULL
+rsq_names <- NULL
+corr_list <- NULL
+corr_names <- NULL
+threshold <- 0.25
+
+
+#Get the length of the one dimension of the square matrix
+len <- length(corr_a[1,])
+
+#Only loop through the upper right triangle since values are repeated in the correlation matrix
+for (i in (1:(len-1))) {
+  for (j in ((i+1):len)) {
+    #Form the name pair and add to the named pair vector
+    pair_name <- paste(names(corr_a[,1])[[i]],names(corr_a[1,])[[j]],sep="-")
+    rsq_names <- c(rsq_names, pair_name)
+    
+    #Add the r_square value to the value vector
+    r_square <- c(r_square, corr_a[i,j]^2)
+    
+    #Form the name pair again for our 'corr_names' variable, then make a list of the correlation values from the upper triangle of the matrix
+    if (corr_a[i,j] > threshold) {
+  
+      corr_names <- c(corr_names, pair_name)
+      corr_list <- c(corr_list, corr_a[i,j])
+    }
+  }
+}
+
+rsq_names
+r_square
+
+#now we create the data frame that will be a column bind of the names and the r square values that we created above. these values will correspond to the associated name pairs in each row.
+rsq_df <- data.frame(cbind(rsq_names, r_square))
+
+#we will label the column of pairs or names as 'Pair' and the r square values as 'Value'
+names(rsq_df)[1] <- "Pair"
+names(rsq_df)[2] <- "Value"
+
+#call the function
+rsq_df
+
+#create the correlation data frame by binding the name pairs and the corresponding correlation values. repeat procedure as above for r square
+
+corr_df <- data.frame(cbind(corr_names, corr_list))
+names(corr_df)[1] <- "Pair"
+names(corr_df)[2] <- "Value"
+corr_df
+
+
+
+#Similarly for mtcars, we use our cars_num variable keeping in mind that am and vs are binary
+
+#there are no categorical variables in mtcars so we cannot make a frequency table of the categorical variables. 
+
+#to make a frequency table of the binary variables, we use the 'table' function and apply it to the variables. We use our mtcars$vs and mtcars$am variables which we know to be binary
+bin_var<-mtcars$vs
+freq_bin<-table(bin_var)
+freq_bin
+
+bin_var<-mtcars$am
+freq_bin<-table(bin_var)
+freq_bin
+
+#i.
+#summary statistic for each numeric variable in a data frame. We use our mtcars data set as our 'datframe'. Similarly, we could use our cars_num variable created above and apply the summary function to it instead
+datframe<-mtcars
+summary(datframe[which(lapply(datframe, is.numeric) == TRUE)])
+
+#ii.
+#to create a data frame that contains each pair of numerical variable names and their corresponding r squared value, first we determine the pairs of numerical variables and then the r square value of each pair. we repeat the code from an earlier question
+
+corr_a <- cor(cars_num, method="pearson")
+
+r_square <- NULL
+rsq_names <- NULL
+corr_list <- NULL
+corr_names <- NULL
+threshold <- 0.25
+
+
+#Get the length of the one dimension of the square matrix
+len <- length(corr_a[1,])
+
+#Only loop through the upper right triangle since values are repeated in the correlation matrix
+for (i in (1:(len-1))) {
+  for (j in ((i+1):len)) {
+    #Form the name pair and add to the named pair vector
+    pair_name <- paste(names(corr_a[,1])[[i]],names(corr_a[1,])[[j]],sep="-")
+    rsq_names <- c(rsq_names, pair_name)
+    
+    #Add the r_square value to the value vector
+    r_square <- c(r_square, corr_a[i,j]^2)
+    
+    #Form the name pair again for our 'corr_names' variable, then make a list of the correlation values from the upper triangle of the matrix
+    if (corr_a[i,j] > threshold) {
+  
+      corr_names <- c(corr_names, pair_name)
+      corr_list <- c(corr_list, corr_a[i,j])
+    }
+  }
+}
+
+rsq_names
+r_square
+
+#now we create the data frame that will be a column bind of the names and the r square values that we created above. these values will correspond to the associated name pairs in each row.
+rsq_df <- data.frame(cbind(rsq_names, r_square))
+
+#we will label the column of pairs or names as 'Pair' and the r square values as 'Value'
+names(rsq_df)[1] <- "Pair"
+names(rsq_df)[2] <- "Value"
+
+#call the function
+rsq_df
+
+#create the correlation data frame by binding the name pairs and the corresponding correlation values. repeat procedure as above for r square
+
+corr_df <- data.frame(cbind(corr_names, corr_list))
+names(corr_df)[1] <- "Pair"
+names(corr_df)[2] <- "Value"
+corr_df
+
