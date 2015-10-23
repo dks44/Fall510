@@ -3,24 +3,30 @@ title: "explore"
 output: html_document
 ---
 
-Question 5
-
 ```{r}
 data(diamonds)
 data(mtcars)
 
-#Separate the columns by mode
-
-
-#a) 
 
 explore <- function(Num_Frame, Bin_Sizes, Threshold) #send in the numeric data frames, some bin sizes which we will specify later in our input, and a specific threshold
 {
   var_num <- Num_Frame[which(lapply(Num_Frame, is.numeric) == TRUE)]
 var_factor <- Num_Frame[which(lapply(Num_Frame, is.factor) == TRUE)]
 
-  
-for (i in 1:length(var_num)) #for every variable in our data frame
+#because there isn't a function is.binary in R, we can create our own that will identify all the columns in a data frame that contain only 1 and 0. The is.binary function will return TRUE if x is binary and will return FALSE otherwise
+is.binary <- function(x)
+  {  
+  col1 <- length(which(x == 1)) #col1 is the number of rows in x which are equal to 1
+
+  col0 <- length(which(x == 0)) #col0 is the number of rows in x which are equal to 0
+
+  y <- (length(x) == col0+col1)
+}
+#creating a variable that contains only the binary variables in a data frame
+var_binary <- Num_Frame[which(lapply(Num_Frame, is.binary) == TRUE)]
+
+#creating blue histograms... 
+for (i in 1:length(var_num)) #for every numeric variable in our data frame
   {
     for (bins in 1:length(Bin_Sizes)) #for every bin size that we specify in our input
     {
@@ -51,16 +57,26 @@ for (i in 1:length(var_num)) #for every variable in our data frame
 
 for (i in 1:length(var_factor)) #for every categorical variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
     {
-    Data_Plot <- ggplot(var_factor,
+    Data_Plot_1 <- ggplot(var_factor,
                         aes(x=var_factor[[i]]),
                         environment = environment())
-    Data_Plot <- Data_Plot +
+    Data_Plot_1 <- Data_Plot_1 +
         geom_bar(colour = 'gray') +
         labs(x=names(var_factor)[[i]])
-  print(Data_Plot)
-  }
+  print(Data_Plot_1)
+}
 
-#** bar graph for binary variables
+
+for (i in 1:length(var_binary)) #for every binary variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
+    {
+    Data_Plot_2 <- ggplot(var_binary,
+                        aes(x=var_binary[[i]]),
+                        environment = environment())
+    Data_Plot_2 <- Data_Plot_2 +
+        geom_bar(colour = 'gray') +
+        labs(x=names(var_binary)[[i]])
+  print(Data_Plot_2)
+}
 
 #correlation and r square values
 corr_a <- cor(var_num, method="pearson")
@@ -110,8 +126,8 @@ print(corr_df)
 #to create frequency table, we use the function table
 table(var_factor)
 
-#**freq table of binary variables
-
+#to create frequency table of binary variables
+table(var_binary)
 
 #to create summary statistic of each numeric variable
 summ_stat<-summary(var_num)
@@ -120,5 +136,6 @@ print(summ_stat)
 list(var_factor, summ_stat, rsq_df, corr_df)
 }
 explore(diamonds, c(5,20,50), 0.25)
+explore(mtcars,c(5,20,50), 0.25)
 ```
 
