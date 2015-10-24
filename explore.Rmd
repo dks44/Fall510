@@ -1,5 +1,5 @@
 ---
-title: "explore"
+title: "test"
 output: html_document
 ---
 
@@ -7,13 +7,11 @@ output: html_document
 data(diamonds)
 data(mtcars)
 
-
 explore <- function(Num_Frame, Bin_Sizes, Threshold) #send in the numeric data frames, some bin sizes which we will specify later in our input, and a specific threshold
-{
-  var_num <- Num_Frame[which(lapply(Num_Frame, is.numeric) == TRUE)]
+  {
+var_num <- Num_Frame[which(lapply(Num_Frame, is.numeric) == TRUE)]
 var_factor <- Num_Frame[which(lapply(Num_Frame, is.factor) == TRUE)]
-
-#because there isn't a function is.binary in R, we can create our own that will identify all the columns in a data frame that contain only 1 and 0. The is.binary function will return TRUE if x is binary and will return FALSE otherwise
+#because there isn't a function is.binary in R, we can create our own that will identify all the columns in a data frame that contain only 1 and 0.
 is.binary <- function(x)
   {  
   col1 <- length(which(x == 1)) #col1 is the number of rows in x which are equal to 1
@@ -25,7 +23,7 @@ is.binary <- function(x)
 #creating a variable that contains only the binary variables in a data frame
 var_binary <- Num_Frame[which(lapply(Num_Frame, is.binary) == TRUE)]
 
-#creating blue histograms... 
+#creating blue histograms with red line at mean
 for (i in 1:length(var_num)) #for every numeric variable in our data frame
   {
     for (bins in 1:length(Bin_Sizes)) #for every bin size that we specify in our input
@@ -53,8 +51,10 @@ for (i in 1:length(var_num)) #for every numeric variable in our data frame
       print(Num_Plot + aes(y=..density..) + labs(y="Density"))
 
     } 
-  }
+}
 
+if length(var_factor)>0
+{
 for (i in 1:length(var_factor)) #for every categorical variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
     {
     Data_Plot_1 <- ggplot(var_factor,
@@ -65,9 +65,11 @@ for (i in 1:length(var_factor)) #for every categorical variable in our data fram
         labs(x=names(var_factor)[[i]])
   print(Data_Plot_1)
 }
+}
 
-
-for (i in 1:length(var_binary)) #for every binary variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
+if length(var_binary)>0 
+{
+  for (i in 1:length(var_binary)) #for every binary variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
     {
     Data_Plot_2 <- ggplot(var_binary,
                         aes(x=var_binary[[i]]),
@@ -76,6 +78,7 @@ for (i in 1:length(var_binary)) #for every binary variable in our data frame tha
         geom_bar(colour = 'gray') +
         labs(x=names(var_binary)[[i]])
   print(Data_Plot_2)
+    }
 }
 
 #correlation and r square values
@@ -100,7 +103,7 @@ for (i in (1:(len-1))) {
    
   }
 }
-    for (i in (1:(len-1))) {
+for (i in (1:(len-1))) {
       for (j in ((i+1):len)) {
     #pulling out correlation values only above the threshold and creating name pairs for each
           if (corr_a[i,j] > Threshold) {
@@ -124,9 +127,11 @@ corr_df <- data.frame(cbind(corr_names, corr_list))
 print(corr_df)
 
 #to create frequency table, we use the function table
+if length(var_factor)>0
 table(var_factor)
 
 #to create frequency table of binary variables
+if length(var_binary)>0
 table(var_binary)
 
 #to create summary statistic of each numeric variable
@@ -135,7 +140,8 @@ print(summ_stat)
 
 list(var_factor, summ_stat, rsq_df, corr_df)
 }
+explore(mtcars, c(5,20,50), 0.25)
 explore(diamonds, c(5,20,50), 0.25)
-explore(mtcars,c(5,20,50), 0.25)
-```
 
+#i'm not sure if it's because I ran this so many times with both data sets that this function now shows me graphs and tables with a mix of both diamonds and mtcars data!!
+```
