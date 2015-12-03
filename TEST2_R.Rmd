@@ -1,0 +1,552 @@
+---
+title: "Test2_R"
+output: html_document
+---
+
+
+```{r}
+
+#retrieve the abalone data
+uciaddress <- "http://archive.ics.uci.edu/ml/machine-learning-databases/"
+dataset <- "abalone/abalone.data"
+getdataset <- paste(uciaddress, dataset, sep="")
+abalone <- read.csv(getdataset)
+str(abalone)
+
+#add column names to the data set
+colnames(abalone) <- c("Gender","Length","Diameter","Height","Whole_wgt","Shucked_wgt","Viscera wgt","Shell wgt","Rings")
+str(abalone)
+head(abalone)
+dim(abalone)
+
+#Question 1
+
+#to pull sample from abalone data frame
+
+n<-nrow(abalone)
+
+absample1<-randomSample(abalone, n*.01, FALSE)
+absample10<-randomSample(abalone, n*.10, FALSE)
+absample25<-randomSample(abalone, n*.25, FALSE)
+absample50<-randomSample(abalone, n*.5, FALSE)
+absample80<-randomSample(abalone, n*.80, FALSE)
+absample100<-randomSample(abalone, n, FALSE)
+
+#to create a vector with the minimum, maximum, mean, and variance of the Whole Weight column in the abalone data set for each of the sample sizes
+data1<-c(min(absample1$Whole_wgt), max(absample1$Whole_wgt), mean(absample1$Whole_wgt), var(absample1$Whole_wgt))
+data10<-c(min(absample10$Whole_wgt), max(absample10$Whole_wgt), mean(absample10$Whole_wgt), var(absample10$Whole_wgt))
+data25<-c(min(absample25$Whole_wgt), max(absample25$Whole_wgt), mean(absample25$Whole_wgt), var(absample25$Whole_wgt))
+data50<-c(min(absample50$Whole_wgt), max(absample50$Whole_wgt), mean(absample50$Whole_wgt), var(absample50$Whole_wgt))
+data80<-c(min(absample80$Whole_wgt), max(absample80$Whole_wgt), mean(absample80$Whole_wgt), var(absample80$Whole_wgt))
+data100<-c(min(absample100$Whole_wgt), max(absample100$Whole_wgt), mean(absample100$Whole_wgt), var(absample100$Whole_wgt))
+
+#to create a data frame with all of the variables created above
+data_all<-data.frame(data1, data10, data25, data50, data80, data100)
+
+#adding column and row names to our data frame
+colnames(data_all)<-c("1%Sample", "10%Sample", "25%Sample", "50%Sample", "80%Sample", "100%Sample")
+rownames(data_all)<-c("SampleMinimum", "SampleMaximum", "SampleMean", "SampleVariance")
+
+data_all
+
+#Question 2
+require(ggplot2)
+
+
+#creating histograms with each of the sample sizes
+sample_plot1<-ggplot(absample1, aes(x=absample1$Whole_wgt))
+sample_plot1<- sample_plot1 + geom_histogram() + labs(x="1% Sample Size")
+print(sample_plot1)
+sample_plot10<-ggplot(absample10, aes(x=absample10$Whole_wgt))
+sample_plot10<- sample_plot10 + geom_histogram() + labs(x="10% Sample Size")
+print(sample_plot10)
+sample_plot25<-ggplot(absample25, aes(x=absample25$Whole_wgt))
+sample_plot25<- sample_plot25 + geom_histogram() + labs(x="25% Sample Size")
+print(sample_plot25)
+sample_plot50<-ggplot(absample50, aes(x=absample50$Whole_wgt))
+sample_plot50<- sample_plot50 + geom_histogram() + labs(x="50% Sample Size")
+print(sample_plot50)
+sample_plot80<-ggplot(absample80, aes(x=absample80$Whole_wgt))
+sample_plot80<- sample_plot80 + geom_histogram() + labs(x="80% Sample Size")
+print(sample_plot80)
+sample_plot100<-ggplot(absample100, aes(x=absample100$Whole_wgt))
+sample_plot100<- sample_plot100 + geom_histogram() + labs(x="100% Sample Size")
+print(sample_plot100)
+
+#creating a grid of histograms created above
+require(gridExtra)
+grid.arrange(sample_plot1, sample_plot10, sample_plot25, sample_plot50, sample_plot80, sample_plot100)
+
+#Question 3
+
+#creating variables so we can call then later in our for loop
+meansample1<-numeric()
+meansample10<-numeric()
+meansample25<-numeric()
+meansample50<-numeric()
+meansample80<-numeric()
+
+#creating for loop that takes 1000 iterations at each sample size and calculates the mean at each iteration
+for (i in 1:1000) {
+  iteration1<-randomSample(abalone, n*.01, FALSE)
+  meansample1[[i]]<-mean(iteration1$Whole_wgt)
+  
+iteration10<-randomSample(abalone, n*.10, FALSE)
+meansample10[[i]]<-mean(iteration10$Whole_wgt)
+
+iteration25<-randomSample(abalone, n*.25, FALSE)
+meansample25[[i]]<-mean(iteration25$Whole_wgt)
+
+iteration50<-randomSample(abalone, n*.50, FALSE)
+meansample50[[i]]<-mean(iteration50$Whole_wgt)
+
+iteration80<-randomSample(abalone, n*.80, FALSE)
+meansample80[[i]]<-mean(iteration80$Whole_wgt)
+
+}
+
+#putting all our variables from our for loop into a data frame that has a column for each of the sample sizes, and 1000 rows where each row is an iteration and the mean calculated at the iteration
+means<-data.frame(meansample1, meansample10, meansample25, meansample50, meansample80)
+
+dim(means)
+
+
+#Question 4
+
+ #to create grid of histograms for each of the sample sizes (except 100%)
+
+for (i in 1:5){
+mean_plot[[i]]<-ggplot(means, aes(x=means[[i]]))
+mean_plot[[i]] <- mean_plot[[i]] + geom_histogram()+
+  labs(x=names(means)[[i]])
+}
+
+#create a histogram for just the 100% sample i.e. the entire abalone Whole_wgt column
+fullsample<-ggplot(abalone, aes(x=abalone$Whole_wgt))
+fullsample<-fullsample + geom_histogram() + labs(x="100% Sample Size")
+
+#combing all our histograms into a grid of histograms
+grid.arrange(mean_plot[[1]], mean_plot[[2]], mean_plot[[3]], mean_plot[[4]], mean_plot[[5]], allmeans)
+
+
+
+#Question 5
+
+
+#calculating our minimum, maximum, mean, and variance values at each of the sample sizes
+remin<-c(min(means$`meansample1`), min(means$`meansample10`), min(means$`meansample25`), min(means$`meansample50`), min(means$`meansample80`), min(abalone$Whole_wgt))
+
+remax<-c(max(means$`meansample1`), max(means$`meansample10`), max(means$`meansample25`), max(means$`meansample50`), max(means$`meansample80`), max(abalone$Whole_wgt))
+
+remean<-c(mean(means$`meansample1`), mean(means$`meansample10`), mean(means$`meansample25`), mean(means$`meansample50`), mean(means$`meansample80`), mean(abalone$Whole_wgt))
+
+revar<-c(var(means$`meansample1`), var(means$`meansample10`), var(means$`meansample25`), var(means$`meansample50`), var(means$`meansample80`), var(abalone$Whole_wgt))
+
+#creating a dataframe with our original data frame from Question 1 and row binding the 4 variables created above
+data_all3<-rbind(data_all, remin, remax, remean, revar)
+
+#naming all rows
+rownames(data_all3)<-c("SampleMinimum", "SampleMaximum", "SampleMean", "SampleVariance", "ResampleMinimum", "ResampleMax","ResampleMean",  "ResampleVariance")
+data_all3
+
+
+#Question 6
+
+data_all3
+
+#pulling just the SampleMean row in our data frame for each of the sample sizes
+line1<-data_all3[3,1]
+line10<-data_all3[3,2]
+line25<-data_all3[3,3]
+line50<-data_all3[3,4]
+line80<-data_all3[3,5]
+
+#creating a histogram of our full data and plotting red mean lines of our other 5 sample sizes on the histogram. Labelling each line with the mean value
+finalhist<-ggplot(abalone, aes(x=abalone$Whole_wgt))
+finalhist<- finalhist + geom_histogram() + labs(x="100% Data") + geom_vline(xintercept=line1, colour='red') +
+        annotate("text",x=line1,y=0,label=line1,hjust=0) + 
+  geom_vline(xintercept=line10, colour='red') +
+        annotate("text",x=line10,y=0,label=line10,hjust=0) + 
+  geom_vline(xintercept=line25, colour='red') +
+        annotate("text",x=line25,y=0,label=line25,hjust=0) + 
+  geom_vline(xintercept=line50, colour='red') +
+        annotate("text",x=line50,y=0,label=line50,hjust=0) + 
+  geom_vline(xintercept=line80, colour='red') +
+        annotate("text",x=line80,y=0,label=line80,hjust=0) 
+print(finalhist)
+
+#Question 7
+
+#pulling just the ResampleMean row in our data frame for each of the sample sizes
+reline1<-data_all3[7,1]
+reline10<-data_all3[7,2]
+reline25<-data_all3[7,3]
+reline50<-data_all3[7,4]
+reline80<-data_all3[7,5]
+
+#creating a histogram of our full data and plotting red resamplemean lines of our other 5 sample sizes on the histogram. Labelling each line with the mean value
+
+refinalhist<-ggplot(abalone, aes(x=abalone$Whole_wgt))
+refinalhist<- refinalhist + geom_histogram() + labs(x="100% Data") + geom_vline(xintercept=reline1, colour='red') +
+        annotate("text",x=reline1,y=0,label=reline1,hjust=0) + 
+  geom_vline(xintercept=reline10, colour='red') +
+        annotate("text",x=reline10,y=0,label=reline10,hjust=0) + 
+  geom_vline(xintercept=reline25, colour='red') +
+        annotate("text",x=reline25,y=0,label=reline25,hjust=0) + 
+  geom_vline(xintercept=reline50, colour='red') +
+        annotate("text",x=reline50,y=0,label=reline50,hjust=0) + 
+  geom_vline(xintercept=reline80, colour='red') +
+        annotate("text",x=reline80,y=0,label=reline80,hjust=0) 
+print(refinalhist)
+```
+
+```{r}
+#Question 8
+
+#running our code above with the diamonds$carat data. all comments above apply here as well.
+
+
+#Question 1
+
+#to pull sample from diamonds data frame
+
+n<-nrow(diamonds)
+
+absample1<-randomSample(diamonds, n*.01, FALSE)
+absample10<-randomSample(diamonds, n*.10, FALSE)
+absample25<-randomSample(diamonds, n*.25, FALSE)
+absample50<-randomSample(diamonds, n*.5, FALSE)
+absample80<-randomSample(diamonds, n*.80, FALSE)
+absample100<-randomSample(diamonds, n, FALSE)
+
+data1<-c(min(absample1$carat), max(absample1$carat), mean(absample1$carat), var(absample1$carat))
+data10<-c(min(absample10$carat), max(absample10$carat), mean(absample10$carat), var(absample10$carat))
+data25<-c(min(absample25$carat), max(absample25$carat), mean(absample25$carat), var(absample25$carat))
+data50<-c(min(absample50$carat), max(absample50$carat), mean(absample50$carat), var(absample50$carat))
+data80<-c(min(absample80$carat), max(absample80$carat), mean(absample80$carat), var(absample80$carat))
+data100<-c(min(absample100$carat), max(absample100$carat), mean(absample100$carat), var(absample100$carat))
+data_all<-data.frame(data1, data10, data25, data50, data80, data100)
+
+colnames(data_all)<-c("1%Sample", "10%Sample", "25%Sample", "50%Sample", "80%Sample", "100%Sample")
+rownames(data_all)<-c("SampleMinimum", "SampleMaximum", "SampleMean", "SampleVariance")
+
+data_all
+
+#Question 2
+require(ggplot2)
+
+
+#add labels for all histograms
+sample_plot1<-ggplot(absample1, aes(x=absample1$carat))
+sample_plot1<- sample_plot1 + geom_histogram() + labs(x="1% Sample Size")
+print(sample_plot1)
+sample_plot10<-ggplot(absample10, aes(x=absample10$carat))
+sample_plot10<- sample_plot10 + geom_histogram() + labs(x="10% Sample Size")
+print(sample_plot10)
+sample_plot25<-ggplot(absample25, aes(x=absample25$carat))
+sample_plot25<- sample_plot25 + geom_histogram() + labs(x="25% Sample Size")
+print(sample_plot25)
+sample_plot50<-ggplot(absample50, aes(x=absample50$carat))
+sample_plot50<- sample_plot50 + geom_histogram() + labs(x="50% Sample Size")
+print(sample_plot50)
+sample_plot80<-ggplot(absample80, aes(x=absample80$carat))
+sample_plot80<- sample_plot80 + geom_histogram() + labs(x="80% Sample Size")
+print(sample_plot80)
+sample_plot100<-ggplot(absample100, aes(x=absample100$carat))
+sample_plot100<- sample_plot100 + geom_histogram() + labs(x="100% Sample Size")
+print(sample_plot100)
+
+require(gridExtra)
+grid.arrange(sample_plot1, sample_plot10, sample_plot25, sample_plot50, sample_plot80, sample_plot100)
+
+#Question 3
+
+meansample1<-numeric()
+meansample10<-numeric()
+meansample25<-numeric()
+meansample50<-numeric()
+meansample80<-numeric()
+
+for (i in 1:1000) {
+  iteration1<-randomSample(diamonds, n*.01, FALSE)
+  meansample1[[i]]<-mean(iteration1$carat)
+  
+iteration10<-randomSample(diamonds, n*.10, FALSE)
+meansample10[[i]]<-mean(iteration10$carat)
+
+iteration25<-randomSample(diamonds, n*.25, FALSE)
+meansample25[[i]]<-mean(iteration25$carat)
+
+iteration50<-randomSample(diamonds, n*.50, FALSE)
+meansample50[[i]]<-mean(iteration50$carat)
+
+iteration80<-randomSample(diamonds, n*.80, FALSE)
+meansample80[[i]]<-mean(iteration80$carat)
+
+}
+
+means<-data.frame(meansample1, meansample10, meansample25, meansample50, meansample80)
+
+dim(means)
+
+
+#Question 4
+
+ #to create grid of histograms for each of the sample sizes (except 100%)
+
+
+for (i in 1:5){
+mean_plot[[i]]<-ggplot(means, aes(x=means[[i]]))
+mean_plot[[i]] <- mean_plot[[i]] + geom_histogram()+
+  labs(x=names(means)[[i]])
+}
+
+fullsample<-ggplot(diamonds, aes(x=diamonds$carat))
+fullsample<-fullsample + geom_histogram() + labs(x="100% Sample Size")
+
+grid.arrange(mean_plot[[1]], mean_plot[[2]], mean_plot[[3]], mean_plot[[4]], mean_plot[[5]], allmeans)
+
+
+
+#Question 5
+
+#calculating our minimum, maximum, mean, and variance values at each of the sample sizes
+remin<-c(min(means$`meansample1`), min(means$`meansample10`), min(means$`meansample25`), min(means$`meansample50`), min(means$`meansample80`), min(diamonds$carat))
+
+remax<-c(max(means$`meansample1`), max(means$`meansample10`), max(means$`meansample25`), max(means$`meansample50`), max(means$`meansample80`), max(diamonds$carat))
+
+remean<-c(mean(means$`meansample1`), mean(means$`meansample10`), mean(means$`meansample25`), mean(means$`meansample50`), mean(means$`meansample80`), mean(diamonds$carat))
+
+revar<-c(var(means$`meansample1`), var(means$`meansample10`), var(means$`meansample25`), var(means$`meansample50`), var(means$`meansample80`), var(diamonds$carat))
+
+
+data_all3<-rbind(data_all, remin, remax, remean, revar)
+rownames(data_all3)<-c("SampleMinimum", "SampleMaximum", "SampleMean", "SampleVariance", "ResampleMinimum", "ResampleMax","ResampleMean",  "ResampleVariance")
+data_all3
+
+
+#Question 6
+
+data_all3
+line1<-data_all3[3,1]
+line10<-data_all3[3,2]
+line25<-data_all3[3,3]
+line50<-data_all3[3,4]
+line80<-data_all3[3,5]
+
+finalhist<-ggplot(diamonds, aes(x=diamonds$carat))
+finalhist<- finalhist + geom_histogram() + labs(x="100% Data") + geom_vline(xintercept=line1, colour='red') +
+        annotate("text",x=line1,y=0,label=line1,hjust=0) + 
+  geom_vline(xintercept=line10, colour='red') +
+        annotate("text",x=line10,y=0,label=line10,hjust=0) + 
+  geom_vline(xintercept=line25, colour='red') +
+        annotate("text",x=line25,y=0,label=line25,hjust=0) + 
+  geom_vline(xintercept=line50, colour='red') +
+        annotate("text",x=line50,y=0,label=line50,hjust=0) + 
+  geom_vline(xintercept=line80, colour='red') +
+        annotate("text",x=line80,y=0,label=line80,hjust=0) 
+print(finalhist)
+
+#Question 7
+
+reline1<-data_all3[7,1]
+reline10<-data_all3[7,2]
+reline25<-data_all3[7,3]
+reline50<-data_all3[7,4]
+reline80<-data_all3[7,5]
+
+refinalhist<-ggplot(diamonds, aes(x=diamonds$carat))
+refinalhist<- refinalhist + geom_histogram() + labs(x="100% Data") + geom_vline(xintercept=reline1, colour='red') +
+        annotate("text",x=reline1,y=0,label=reline1,hjust=0) + 
+  geom_vline(xintercept=reline10, colour='red') +
+        annotate("text",x=reline10,y=0,label=reline10,hjust=0) + 
+  geom_vline(xintercept=reline25, colour='red') +
+        annotate("text",x=reline25,y=0,label=reline25,hjust=0) + 
+  geom_vline(xintercept=reline50, colour='red') +
+        annotate("text",x=reline50,y=0,label=reline50,hjust=0) + 
+  geom_vline(xintercept=reline80, colour='red') +
+        annotate("text",x=reline80,y=0,label=reline80,hjust=0) 
+print(refinalhist)
+
+
+
+```
+
+```{r}
+
+#running our code above with the faithful$eruptions data. all comments above apply here as well.
+
+#Question 1
+
+#to pull sample from faithful data frame
+
+n<-nrow(faithful)
+
+absample1<-randomSample(faithful, n*.01, FALSE)
+absample10<-randomSample(faithful, n*.10, FALSE)
+absample25<-randomSample(faithful, n*.25, FALSE)
+absample50<-randomSample(faithful, n*.5, FALSE)
+absample80<-randomSample(faithful, n*.80, FALSE)
+absample100<-randomSample(faithful, n, FALSE)
+
+
+data1<-c(min(absample1$eruptions), max(absample1$eruptions), mean(absample1$eruptions), var(absample1$eruptions))
+data10<-c(min(absample10$eruptions), max(absample10$eruptions), mean(absample10$eruptions), var(absample10$eruptions))
+data25<-c(min(absample25$eruptions), max(absample25$eruptions), mean(absample25$eruptions), var(absample25$eruptions))
+data50<-c(min(absample50$eruptions), max(absample50$eruptions), mean(absample50$eruptions), var(absample50$eruptions))
+data80<-c(min(absample80$eruptions), max(absample80$eruptions), mean(absample80$eruptions), var(absample80$eruptions))
+data100<-c(min(absample100$eruptions), max(absample100$eruptions), mean(absample100$eruptions), var(absample100$eruptions))
+data_all<-data.frame(data1, data10, data25, data50, data80, data100)
+
+colnames(data_all)<-c("1%Sample", "10%Sample", "25%Sample", "50%Sample", "80%Sample", "100%Sample")
+rownames(data_all)<-c("SampleMinimum", "SampleMaximum", "SampleMean", "SampleVariance")
+
+data_all
+
+#Question 2
+require(ggplot2)
+
+
+#add labels for all histograms
+sample_plot1<-ggplot(absample1, aes(x=absample1$eruptions))
+sample_plot1<- sample_plot1 + geom_histogram() + labs(x="1% Sample Size")
+print(sample_plot1)
+sample_plot10<-ggplot(absample10, aes(x=absample10$eruptions))
+sample_plot10<- sample_plot10 + geom_histogram() + labs(x="10% Sample Size")
+print(sample_plot10)
+sample_plot25<-ggplot(absample25, aes(x=absample25$eruptions))
+sample_plot25<- sample_plot25 + geom_histogram() + labs(x="25% Sample Size")
+print(sample_plot25)
+sample_plot50<-ggplot(absample50, aes(x=absample50$eruptions))
+sample_plot50<- sample_plot50 + geom_histogram() + labs(x="50% Sample Size")
+print(sample_plot50)
+sample_plot80<-ggplot(absample80, aes(x=absample80$eruptions))
+sample_plot80<- sample_plot80 + geom_histogram() + labs(x="80% Sample Size")
+print(sample_plot80)
+sample_plot100<-ggplot(absample100, aes(x=absample100$eruptions))
+sample_plot100<- sample_plot100 + geom_histogram() + labs(x="100% Sample Size")
+print(sample_plot100)
+
+require(gridExtra)
+grid.arrange(sample_plot1, sample_plot10, sample_plot25, sample_plot50, sample_plot80, sample_plot100)
+
+#Question 3
+
+meansample1<-numeric()
+meansample10<-numeric()
+meansample25<-numeric()
+meansample50<-numeric()
+meansample80<-numeric()
+
+
+for (i in 1:1000) {
+  iteration1<-randomSample(faithful, n*.01, FALSE)
+  meansample1[[i]]<-mean(iteration1$eruptions)
+  
+iteration10<-randomSample(faithful, n*.10, FALSE)
+meansample10[[i]]<-mean(iteration10$eruptions)
+
+iteration25<-randomSample(faithful, n*.25, FALSE)
+meansample25[[i]]<-mean(iteration25$eruptions)
+
+iteration50<-randomSample(faithful, n*.50, FALSE)
+meansample50[[i]]<-mean(iteration50$eruptions)
+
+iteration80<-randomSample(faithful, n*.80, FALSE)
+meansample80[[i]]<-mean(iteration80$eruptions)
+
+}
+
+means<-data.frame(meansample1, meansample10, meansample25, meansample50, meansample80)
+
+dim(means)
+
+
+#Question 4
+
+ #to create grid of histograms for each of the sample sizes (except 100%)
+
+
+for (i in 1:5){
+mean_plot[[i]]<-ggplot(means, aes(x=means[[i]]))
+mean_plot[[i]] <- mean_plot[[i]] + geom_histogram()+
+  labs(x=names(means)[[i]])
+}
+
+fullsample<-ggplot(faithful, aes(x=faithful$eruptions))
+fullsample<-fullsample + geom_histogram() + labs(x="100% Sample Size")
+
+grid.arrange(mean_plot[[1]], mean_plot[[2]], mean_plot[[3]], mean_plot[[4]], mean_plot[[5]], allmeans)
+
+
+
+#Question 5
+
+#calculating our minimum, maximum, mean, and variance values at each of the sample sizes
+remin<-c(min(means$`meansample1`), min(means$`meansample10`), min(means$`meansample25`), min(means$`meansample50`), min(means$`meansample80`), min(dfaithful$eruptions))
+
+remax<-c(max(means$`meansample1`), max(means$`meansample10`), max(means$`meansample25`), max(means$`meansample50`), max(means$`meansample80`), max(faithful$eruptions))
+
+remean<-c(mean(means$`meansample1`), mean(means$`meansample10`), mean(means$`meansample25`), mean(means$`meansample50`), mean(means$`meansample80`), mean(faithful$eruptions))
+
+revar<-c(var(means$`meansample1`), var(means$`meansample10`), var(means$`meansample25`), var(means$`meansample50`), var(means$`meansample80`), var(faithful$eruptions))
+
+
+data_all3<-rbind(data_all, remin, remax, remean, revar)
+rownames(data_all3)<-c("SampleMinimum", "SampleMaximum", "SampleMean", "SampleVariance", "ResampleMinimum", "ResampleMax","ResampleMean",  "ResampleVariance")
+data_all3
+
+
+#Question 6
+
+data_all3
+line1<-data_all3[3,1]
+line10<-data_all3[3,2]
+line25<-data_all3[3,3]
+line50<-data_all3[3,4]
+line80<-data_all3[3,5]
+
+finalhist<-ggplot(faithful, aes(x=faithful$eruptions))
+finalhist<- finalhist + geom_histogram() + labs(x="100% Data") + geom_vline(xintercept=line1, colour='red') +
+        annotate("text",x=line1,y=0,label=line1,hjust=0) + 
+  geom_vline(xintercept=line10, colour='red') +
+        annotate("text",x=line10,y=0,label=line10,hjust=0) + 
+  geom_vline(xintercept=line25, colour='red') +
+        annotate("text",x=line25,y=0,label=line25,hjust=0) + 
+  geom_vline(xintercept=line50, colour='red') +
+        annotate("text",x=line50,y=0,label=line50,hjust=0) + 
+  geom_vline(xintercept=line80, colour='red') +
+        annotate("text",x=line80,y=0,label=line80,hjust=0) 
+print(finalhist)
+
+#Question 7
+
+reline1<-data_all3[7,1]
+reline10<-data_all3[7,2]
+reline25<-data_all3[7,3]
+reline50<-data_all3[7,4]
+reline80<-data_all3[7,5]
+
+refinalhist<-ggplot(faithful, aes(x=faithful$eruptions))
+refinalhist<- refinalhist + geom_histogram() + labs(x="100% Data") + geom_vline(xintercept=reline1, colour='red') +
+        annotate("text",x=reline1,y=0,label=reline1,hjust=0) + 
+  geom_vline(xintercept=reline10, colour='red') +
+        annotate("text",x=reline10,y=0,label=reline10,hjust=0) + 
+  geom_vline(xintercept=reline25, colour='red') +
+        annotate("text",x=reline25,y=0,label=reline25,hjust=0) + 
+  geom_vline(xintercept=reline50, colour='red') +
+        annotate("text",x=reline50,y=0,label=reline50,hjust=0) + 
+  geom_vline(xintercept=reline80, colour='red') +
+        annotate("text",x=reline80,y=0,label=reline80,hjust=0) 
+print(refinalhist)
+
+```
+
+```{r}
+#Question 9
+
+#Mean values seem to be similar for our sample sizes whether whether we take the sample mean or resample the mean for each of the sample sizes. We see this for the abalone and diamonds data sets, but notice a difference in the re-sample histogram for the faithful dataframe. This could be due to the small sample size in faithful (272) as compared to abalone (4176) and diamonds(53940).
+
+dim(faithful)
+dim(diamonds)
+dim(abalone)
