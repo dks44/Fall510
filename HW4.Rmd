@@ -9,6 +9,8 @@ Question 1: Create vectors
 #a)
 a<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
 a #created vector a and calling function
+# SW: much easier to write
+1:20
 
 #b)
 b<-c(20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
@@ -17,6 +19,8 @@ b  #created vector b and calling function
 #c)
 c<-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
 c  #created vector c and calling function
+# SW: this quickly becomes error-prone, try
+c(1:20,19:1)
 
 #d)
 temp<-c(4,6,3)
@@ -114,6 +118,10 @@ s<-(p+(2*q)-r) #this variable will be the function we want to estimate. it is a 
 s
 xVec[4]+(2*xVec[5])-xVec[6] #checking a value that should be a result of our output according to the function
 
+# SW: lost points: this is not the correct vector. the sequence is not every
+# third element, but rather 
+xVec[1:248] + 2 * xVec[2:249] - xVec[3:250]
+
 #d) #we want to calculate a function that will sum a fraction of our xVec characters, from the 1st to the n-1 (249)th character in xVec
 x_num<-xVec[seq(2, length(xVec), by=1)] #since we're starting at the 2nd character in our vector xVec (x_i+1), we want to ensure the n-1+1th character is included in our sequence, hence we include the entire length of xVec
 x_num
@@ -151,11 +159,18 @@ length(yVec[yVec>796]) #we want to determine how many characters there are in ou
 #f) we want to determine the number of characters in xVec that are divisible by 2. there are different ways to do this; one of which is to determine the indices of all even characters in xVec, and count that list of indices
 which(xVec %% 2 == 1) #listing the indices of characters in xVec that are even
 length(which(xVec %% 2 == 1)) #we want the length of the list above i.e. count how many characters in xvec are even
+# SW: lost points: if a number k is divisible by 2, then the return value
+# from %% will be zero, i.e., k %% 2 is equal to zero if k is divisible by 2.
+sum(xVec %% 2 == 0)
 
 #g) we want to sort xVec based on the order of the values in yVec.
 ?sort
 yVec[sort(order(yVec)[xVec])] #we need to take the values in yVec (so we start with yVec[]) and then sort xVec based on their order. So we sort() with input of the values of xvec, [xVec], and the order of yVec.
 yVec #checking yVec values to see if output of function above is in order of yVec values.
+# SW: lost points: your code isn't doing what you think. specifically, the 
+# statement order(yVec)[xVec] returns the elements of order(yVec) indexed by
+# xVec, which will be NA whenever xVec > 250. this is all you need:
+xVec[order(yVec)]
 
 #h) we want to list the characters in yVec that are in the index positions 1, 4, 7, 10, etc. i.e. we want every third yVec character, beginning with the first one.
 yVec[seq(1, length(yVec), by = 3)]
