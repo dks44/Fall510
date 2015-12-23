@@ -3,14 +3,19 @@ title: "HW5"
 output: html_document
 ---
 
+SW: nice job overall, see comments below.
+
 Question 1
 ```{r}
 require(scales) #to view the data in a tabular format
+# SW: you need to load the ggplot2 library to gain access to the diamonds data
+library(ggplot2)
 data(diamonds)
 numcols<-diamonds[sapply(diamonds, is.numeric)] #we use the sapply function to apply an operation to a list of data. in this case we want to  pull out those columns that are numeric (hence is.numeric function) from the diamonds data. we can use this function on any data frame.
 numcols
 names(numcols)#calling the function
-View(diamonds) #to compare the output of our numcols function to the data in diamonds
+# SW: were you able to knit this document? this call fails for me
+# View(diamonds) #to compare the output of our numcols function to the data in diamonds
 
 ```
 
@@ -21,10 +26,15 @@ data(diamonds)
 numcols<-diamonds[sapply(diamonds, is.numeric)] #we use the sapply function to apply an operation to a list of data. in this case we want to  pull out those columns that are numeric (hence is.numeric function) from the diamonds data. we can use this function on any data frame.
 numcols
 names(numcols)#identifying the columns in numcols
-View(diamonds) #to compare the output of our numcols function to the data in diamonds
+# SW: commented out the below line as well so the document would knit
+# View(diamonds) #to compare the output of our numcols function to the data in diamonds
 
 F<-t(combn(names(numcols), 2)) #we want to form combinations of 2 of all the column names in numcols/ the combn function spits out all unique combinations. we do a tranpose of the matrix, t(), to make the pairings easier to read
 F
+# SW: F is a reserved word in R, an abbreviation for the Boolean value FALSE.
+# in general, you will want to avoid using reserved words when naming your
+# own objects 
+
 Pairings<-paste(F[,1], F[,2], sep="-") #we want to take the columns of our combination matrix and separate them by a hyphen. we use the names of the columns of our variable F in the paste function
 Pairings
 
@@ -101,5 +111,36 @@ ggplot(numcols, aes(x=y, y=z))+geom_point()+labs(title=test$Freq[21])
 
 #a much quicker option I discovered...
 pairs(numcols) #gives a matrix of all scatterplot between pairs of variables in our input i.e. all numeric columns in diamonds. but doesn't allow labelling of individual plots; also isn't ggplot!! 
+```
 
+```{r, eval = F}
+# SW: here's another way to create the plots all at once vs one-at-a-time
+get_numeric <- function(dat) {
+  nc <- lapply(dat, class) %in% c("numeric","integer")
+  return(dat[,nc])
+}
 
+corrfn <- function(dat) {
+  comb <- combn(colnames(dat), 2)
+  out <- apply(comb, MARGIN = 2, 
+               FUN = function(x) {
+                 return(c(paste(x[1], x[2], sep="-"), 
+                          cor(dat[x[1]], dat[x[2]])))
+               })
+  return(data.frame(vars = out[1,], corr = out[2,]))
+}
+
+plotnum <- function(dat) {
+  dat_nc <- get_numeric(dat)
+  lbl <- corrfn(dat_nc)
+  comb <- combn(colnames(dat_nc), 2)
+  apply(comb, MARGIN = 2,
+        FUN = function(x) {
+          plot(dat_nc[,x[1]], dat_nc[,x[2]], xlab = x[1], ylab = x[2],
+               main = paste0(x[1],"-",x[2],": ",
+                             lbl[lbl[,1] == paste(x[1],x[2],sep="-"),2]))
+        })
+}
+
+plotnum(diamonds)
+```
