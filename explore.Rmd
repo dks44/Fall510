@@ -3,6 +3,8 @@ title: "test"
 output: html_document
 ---
 
+SW: did you test your code? it doesn't work as written. I made some minimal edits to get it running, but without some big pieces, including the correlations. I think I see where you were going with the code, so you didn't lose a lot of points for this. also, you're not handling the frequency tables for the categorical and binary variables correctly. you need to consider the absolute value of the correlation coefficient, not just positive values. you should also explicitly call `return` to return the data frame.
+
 ```{r}
 data(diamonds)
 data(mtcars)
@@ -20,6 +22,8 @@ is.binary <- function(x)
 
   y <- (length(x) == col0+col1)
 }
+# SW: nice job checking for binary variables, which are basically logicals.
+
 #creating a variable that contains only the binary variables in a data frame
 var_binary <- Num_Frame[which(lapply(Num_Frame, is.binary) == TRUE)]
 
@@ -52,8 +56,9 @@ for (i in 1:length(var_num)) #for every numeric variable in our data frame
 
     } 
 }
-
-if length(var_factor)>0
+# SW: this doesn't work
+#if length(var_factor)>0
+if(length(var_factor)>0)
 {
 for (i in 1:length(var_factor)) #for every categorical variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
     {
@@ -66,8 +71,9 @@ for (i in 1:length(var_factor)) #for every categorical variable in our data fram
   print(Data_Plot_1)
 }
 }
-
-if length(var_binary)>0 
+# SW: this doesn't work
+#if length(var_binary)>0
+if(length(var_binary)>0)
 {
   for (i in 1:length(var_binary)) #for every binary variable in our data frame that we input, we will create a ggplot base layer then add a bar graph layer with the x axis containing each category of our input variables. we will also label the x axis with the name of each variable
     {
@@ -103,13 +109,15 @@ for (i in (1:(len-1))) {
    
   }
 }
+
 for (i in (1:(len-1))) {
       for (j in ((i+1):len)) {
     #pulling out correlation values only above the threshold and creating name pairs for each
           if (corr_a[i,j] > Threshold) {
-  
-      corr_names <- c(corr_names, pair_name)
-      corr_list <- c(corr_list, corr_a[i,j])
+            # SW: for this to work, you need to create corr_names before you
+            # enter the loop
+      #corr_names <- c(corr_names, pair_name)
+      #corr_list <- c(corr_list, corr_a[i,j])
     }
   }
 }
@@ -123,23 +131,34 @@ rsq_df <- data.frame(cbind(rsq_names, r_square))
 print(rsq_df)
 
 #to create data frame of correlation name pairs and their corresponding Pearson correlation values
-corr_df <- data.frame(cbind(corr_names, corr_list))
-print(corr_df)
+# SW: if these don't get created above, this will fail
+# corr_df <- data.frame(cbind(corr_names, corr_list))
+# print(corr_df)
 
 #to create frequency table, we use the function table
-if length(var_factor)>0
+# SW: this doesn't work
+#if length(var_factor)>0
+if(length(var_factor)>0)
 table(var_factor)
+# SW: lost points: this isn't right, you should be printing frequency tables 
+# for the factor variables separately, e.g., table(diamonds$cut)
 
 #to create frequency table of binary variables
-if length(var_binary)>0
+# SW: this doesn't work
+#if length(var_binary)>0
+if(length(var_binary)>0)
 table(var_binary)
 
 #to create summary statistic of each numeric variable
 summ_stat<-summary(var_num)
 print(summ_stat)
 
-list(var_factor, summ_stat, rsq_df, corr_df)
+# SW: your correlation code doesn't work, so this is commented out
+#list(var_factor, summ_stat, rsq_df, corr_df)
+list(var_factor, summ_stat, rsq_df)
 }
+# SW: you need to load ggplot2
+library(ggplot2)
 explore(mtcars, c(5,20,50), 0.25)
 explore(diamonds, c(5,20,50), 0.25)
 
